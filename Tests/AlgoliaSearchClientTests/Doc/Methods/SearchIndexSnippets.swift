@@ -27,8 +27,8 @@ extension SearchIndexSnippets {
   func search() {
     let index = client.index(withName: "contacts")
     index.search(query: "s") { result in
-      if case .success(let response) = result {
-        print("Response: \(response)")
+      if case .success(let searchResponse) = result {
+        print("Search response: \(searchResponse)")
       }
     }
 
@@ -36,8 +36,8 @@ extension SearchIndexSnippets {
     query.attributesToRetrieve = ["firstname", "lastname"]
     query.hitsPerPage = 50
     index.search(query: query) { result in
-      if case .success(let response) = result {
-        print("Response: \(response)")
+      if case .success(let searchResponse) = result {
+        print("Search response: \(searchResponse)")
       }
     }
   }
@@ -47,8 +47,8 @@ extension SearchIndexSnippets {
     var requestOptions = RequestOptions()
     requestOptions.headers["X-Algolia-UserToken"] = "user123"
     index.search(query: "s", requestOptions: requestOptions) { result in
-      if case .success(let response) = result {
-        print("Response: \(response)")
+      if case .success(let searchResponse) = result {
+        print("Search response: \(searchResponse)")
       }
     }
   }

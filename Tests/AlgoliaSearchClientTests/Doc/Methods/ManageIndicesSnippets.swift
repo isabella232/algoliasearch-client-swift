@@ -50,6 +50,82 @@ extension ManageIndicesSnippets {
     }
   }
   
+  func deleteAllIndices() {
+    
+    // Primary indices only
+    client.listIndices { result in
+      guard case .success(let response) = result else {
+        return
+      }
+      let operations = response.items
+        .filter { $0.primary == nil }
+        .map(\.name)
+        .map { ($0, BatchOperation(action: .delete)) }
+      client.multipleBatchObjects(operations: operations) { result in
+        guard case .success(let response) = result else {
+          return
+        }
+        print(response.batchesResponse.objectIDs)
+      }
+    }
+    
+    // Primary and replica indices
+    client.listIndices { result in
+      guard case .success(let response) = result else {
+        return
+      }
+      
+      let primaryIndicesDeleteOperations = response.items
+        .filter { $0.primary == nil }
+        .map(\.name)
+        .map { ($0, BatchOperation(action: .delete)) }
+
+      let replicaIndicesDeleteOperations = response.items
+        .filter { $0.primary != nil }
+        .map(\.name)
+        .map { ($0, BatchOperation(action: .delete)) }
+
+      
+      client.multipleBatchObjects(operations: primaryIndicesDeleteOperations) { result in
+        guard case .success(let response) = result else {
+          return
+        }
+        response.wait { result in
+          guard case .success = result else {
+            return
+          }
+          print("Done deleting primary indices")
+          client.multipleBatchObjects(operations: replicaIndicesDeleteOperations) { result in
+            guard case .success = result else {
+              return
+            }
+            print("Done deleting replica indices")
+          }
+        }
+      }
+    }
+    
+    func deleteSubsetOfIndices() {
+      client.listIndices { result in
+        guard case .success(let response) = result else {
+          return
+        }
+        let deleteOperations: [(IndexName, BatchOperation)] = response.items
+          .map(\.name)
+          .filter { $0.rawValue.contains("test_") }
+          .map { ($0, .delete) }
+        
+        client.multipleBatchObjects(operations: deleteOperations) { result in
+          guard case .success = result else {
+            return
+          }
+          print("Response: \(response)")
+        }
+      }
+    }
+
+  }
+  
 }
 
 //MARK: - Copy index

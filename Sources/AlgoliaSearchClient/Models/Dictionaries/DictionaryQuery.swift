@@ -29,6 +29,8 @@ public struct DictionaryQuery: Codable {
 
 }
 
+extension DictionaryQuery: Builder {}
+
 extension DictionaryQuery: ExpressibleByStringInterpolation {
 
   public init(stringLiteral value: String) {

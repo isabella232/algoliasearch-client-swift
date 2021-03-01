@@ -110,14 +110,13 @@ extension DictionariesSnippets {
   }
   
   func clearEntires() {
-    client.clearDictionaryEntries(in: StopwordsDictionary.self) { result in
+    client.clearDictionaryEntries(dictionary: StopwordsDictionary.self) { result in
       if case .success(let response) = result {
         print("Response: \(response)")
       }
     }
   }
 
-  
 }
 
 //MARK: - Search dictionary entries
